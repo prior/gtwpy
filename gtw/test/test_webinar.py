@@ -25,6 +25,9 @@ class WebinarTest(unittest2.TestCase):
         pprint(Webinar.get('881725327'))
         pprint(Webinar.get('141360359'))
 
+    def test_get_sessions(self):
+        pprint(Webinar.get_sessions())
+
         #new_events = [helper.generate_event(), helper.generate_event()]
         #session_keys = [ev.session_key for ev in self.event_controller.list_()]
         #self.assertEquals(len(session_keys), self.event_controller.count)

@@ -55,6 +55,17 @@ class Base(object):
         return json.loads(result.text)
 
 
+class Organizer(Base):
+    def __init__(self, **key):
+        pass
+
+class Event(Base):
+    def __init__(self, **kwargs):
+        super(Event, self).__init__()
+        self.start = sanetime(kwargs.get('start') or kwargs.get('startTime'))
+        self.stop = sanetime(kwargs.get('stop') or kwargs.get('stopTime'))
+        self.webinar = webinar
+
 class Webinar(Base):
     def __init__(self, **kwargs):
         super(Webinar, self).__init__()
@@ -83,8 +94,9 @@ class Webinar(Base):
         return Webinar(**kls._call('webinars/%s'%key))
 
     
-    #def _sessions(self):
-        #self.__sessions = [Session(**s) for s in kls._call('webinars/%s/sessions')]
+    @classmethod
+    def get_sessions(kls):
+        return [Session(**s) for s in kls._call('sessions')]
 
     #@property
     #def sessions(self):
@@ -107,10 +119,10 @@ class Session(Base):
     def __init__(self, **kwargs):
         super(Session, self).__init__()
         self.key = kwargs.get('sessionKey') or kwargs.get('key')
-        self.webinar = kwargs['webinar']
-        self.start = sanetime(kwargs['start'])
-        self.stop = sanetime(kwargs['stop'])
-        self.attendant_count = kwargs.get('registrantsAttend')
+        self.webinar = kwargs.get('webinar') or kwargs.get('webinarKey') and Webinar(key=kwargs['webinarKey'])
+        self.start = sanetime(kwargs.get('start') or kwargs.get('startTime'))
+        self.stop = sanetime(kwargs.get('stop') or kwargs.get('endTime'))
+        self.attendant_count = kwargs.get('registrantsAttended')
 
     def __repr__(self):
         return "Session(**%s)" % self.__dict__
