@@ -1,0 +1,14 @@
+# To turn this sample json into something you can use with the integration unittests, you need to 
+#   1) remove all the comments
+#   2) replace the fields in the json
+#   3) rename this file to drop the ".sample" suffix
+# and then you should be able to run the integration tests
+
+{ 
+  "default": {
+    "organizer_key": "your-organizer-key",
+    "oauth_token": "your-oauth-token"  # must retrive this through oauth flow -- no way to get it from unittests without firing up external webserver
+  }
+  # you can add others for special specific account testing
+}
+

@@ -1,146 +1,86 @@
-import sys
-from sanetime import sanetime
-from pprint import pformat
-from urllib import urlencode
-from . import error
-import requests
-import json
-from test import helper
+from utils.dict import mget,getdict,merge
+from utils.obj import kwargs_str
+from utils.property import cached_property, is_cached, cached_value, cached_key
+from utils.string import cutoff
+from .session import Session
+from giftwrap import JsonExchange
+from .registrant import Registrant
+from .base import Base
 
-class Base(object):
-    URL_PREFIX = 'https://api.citrixonline.com/G2W/rest/'
-    TOKEN = helper.get_creds()['token']
-    ORGANIZER_KEY = helper.get_creds()['organizer_key']
-    TIMEOUT = 20
-
-    def __init__(self):
-        super(Base, self).__init__()
-#        self.log = logging_glue.get_log('webex.event_controller')
-
-
-    @classmethod
-    def _raise(kls, error_kls, result=None):
-        err = result and error_kls(result.status_code, result.text) or error_kls()
-        raise err, None, sys.exc_info()[2]
-
-    # start and stop expect sanetime times
-    @classmethod
-    def _call(kls, subpath, start=None, stop=None):
-        url = '%s/organizers/%s/%s' % (kls.URL_PREFIX, kls.ORGANIZER_KEY, subpath)
-        if start or stop:
-            h = {}
-            if start: h['fromTime']=start.strftime('%Y-%m-%dT%H:%M:%S')
-            if stop: h['toTime']=stop.strftime('%Y-%m-%dT%H:%M:%S')
-            url = "%s?%s" % (url, urlencode(h))
-        headers = {'Accept': 'application/json', 'Content-Type': 'application/json', 'Authorization': 'OAuth oauth_token=%s'%kls.TOKEN}
-        try:
-            result = requests.get(url, headers=headers, timeout=kls.TIMEOUT)
-        except requests.RequestException:
-            kls._raise(error.Timeout)
-
-        if result.status_code == 400:
-            kls._raise(error.BadRequest, result)
-        elif result.status_code == 401:
-            if result.text.find('locked'):
-                kls._raise(error.LockedAccount, result)
-            else:
-                kls._raise(error.BadRequest, result)
-        elif result.status_code == 403:
-            kls._raise(error.BadRequest, result)
-        elif result.status_code == 500 or result.status_code==503:
-            kls._raise(error.ServiceDown, result)
-        elif result.status_code != 200:
-            kls._raise(error.Unknown, result)
-
-        return json.loads(result.text)
-
-
-class Organizer(Base):
-    def __init__(self, **key):
-        pass
-
-class Event(Base):
-    def __init__(self, **kwargs):
-        super(Event, self).__init__()
-        self.start = sanetime(kwargs.get('start') or kwargs.get('startTime'))
-        self.stop = sanetime(kwargs.get('stop') or kwargs.get('stopTime'))
-        self.webinar = webinar
 
 class Webinar(Base):
-    def __init__(self, **kwargs):
+    def __init__(self, organizer, **kwargs):
         super(Webinar, self).__init__()
-        self.key = kwargs.get('webinarKey') or kwargs.get('key')
-        self.subject = kwargs.get('subject')
+        self.organizer = organizer
+        self.key = mget(kwargs,'key','webinarKey')
+        self.subject = mget(kwargs,'subject','name')
         self.description = kwargs.get('description')
-        self.sessions = [Session(webinar=self, start=span['startTime'], stop=span['endTime']) for span in kwargs.get('times',[])]
+        self.timezone = mget(kwargs, 'timezone', 'timeZone') or 'UTC'
+        if kwargs.has_key('sessions'): self.sessions = kwargs['sessions']
+        if kwargs.has_key('registrants'): self.registrants = kwargs['registrants']
+        if kwargs.has_key('times') and not is_cached(self,'sessions'):
+            extras = getdict(kwargs, 'scheduled','actual')
+            self.sessions = [Session(webinar=self, **merge(span,extras)) for span in kwargs.get('times',[])]
 
-    @classmethod
-    def historical(kls, start=None, stop=None):
-        data = kls._call('historicalWebinars', start=start, stop=stop)
-        return [kls(**w) for w in data]
+    def __repr__(self): 
+        return "Webinar(%s)" % kwargs_str(self,attrs=['organizer','key','subject','description'],cached=['sessions','registrants'])
+    def __str__(self): return unicode(self).encode('utf-8')
+    def __unicode__(self):
+        webinar_key = self.key or '?'
+        subject = self.subject or '?'
+        description = cutoff(self.description or '?', 40)
+        sessions = "\n  ".join(['']+[unicode(s) for s in cached_value(self,'sessions',[])])
+        registrants = "\n  ".join(['']+[unicode(s) for s in cached_value(self,'registrants',[])])
+        return u"W[%s]%s{%s}%s%s" % (webinar_key, subject, description, registrants, sessions) 
 
-    @classmethod
-    def upcoming(kls, start=None, stop=None):
-        data = kls._call('upcomingWebinars', start=start, stop=stop)
-        return [kls(**w) for w in data]
+    def merge(self, webinar):
+        self.merge_primitives(webinar)
+        self._merge_cached_exchange_collection(webinar, 'registrants', keys=['email'])
+        self._merge_cached_exchange_collection(webinar, 'sessions', keys=['key','starts_at','started_at'], session_match=True)
+        return self
 
-    @classmethod
-    def all(kls, start=None, stop=None):
-        data = kls._call('webinars', start=start, stop=stop)
-        return [kls(**w) for w in data]
+    def merge_primitives(self, webinar):
+        return self._merge_primitives(webinar, 'organizer','key','subject','description')
+        if webinar.timezone and webinar.timezone != 'UTC': self.timezone = webinar.timezone
 
-    @classmethod
-    def get(kls, key):
-        return Webinar(**kls._call('webinars/%s'%key))
+
+    #TODO: deal with scenario where times are equal but timezones are different -- what should we do?
+    def __cmp__(self, other): return self._cmp_components(other, cached_key('sessions'), 'key', 'subject', 'description', 'timezone', cached_key('registrants'))
+
+    def clone(self):
+        return Webinar(None).merge(self)
+
+    @cached_property
+    def sessions(self): return self._sessions_ex.result
+
+    @cached_property
+    def registrants(self): 
+        return self._registrants_ex.result
+
+    @cached_property
+    def _sessions_ex(self): return GetSessions(self)
+
+    @cached_property
+    def _registrants_ex(self): return GetRegistrants(self)
 
     
-    @classmethod
-    def get_sessions(kls):
-        return [Session(**s) for s in kls._call('sessions')]
+class WebinarExchange(JsonExchange):
+    def __init__(self, webinar, **kwargs):
+        super(WebinarExchange, self).__init__(webinar.organizer, **kwargs)
+        self.webinar = webinar
 
-    #@property
-    #def sessions(self):
+class GetSessions(WebinarExchange):
+    def sub_path(self): return 'webinars/%s/sessions'%self.webinar.key
+    def process_data(self, data, response): 
+        sessions = []
+        for kwargs in data:
+            webinar_key = kwargs.pop('webinarKey')
+            if webinar_key != self.webinar.key: raise ValueError('somethings not right here')
+            sessions.append(Session(self.webinar, actual=True, **kwargs))
+        return sessions
 
-
-    #@classmethod
-    #def get_meeting_times(kls, key):
-        #webinar = Webinar(key=key)
-        #kls._call('webinars/%s/meetingTimes'%key)
-        #return [Session(webinar=webinar, start=span['startTime']
-
-    def __repr__(self):
-        return "Webinar(**%s)" % self.__dict__
-
-    def __str__(self):
-        return self.__dict__
-
-
-class Session(Base):
-    def __init__(self, **kwargs):
-        super(Session, self).__init__()
-        self.key = kwargs.get('sessionKey') or kwargs.get('key')
-        self.webinar = kwargs.get('webinar') or kwargs.get('webinarKey') and Webinar(key=kwargs['webinarKey'])
-        self.start = sanetime(kwargs.get('start') or kwargs.get('startTime'))
-        self.stop = sanetime(kwargs.get('stop') or kwargs.get('endTime'))
-        self.attendant_count = kwargs.get('registrantsAttended')
-
-    def __repr__(self):
-        return "Session(**%s)" % self.__dict__
-
-    def __str__(self):
-        return self.__dict__
-
-    def _log(self, action, event=None, level='info'):
-        title = event and event.title or '?'
-        headline = '%s... (event=%s account=%s)' % (action, title, self.account.webex_id)
-        getattr(self.log, level)(headline)
-        if event is not None:
-            self.log.debug('%s...   event=%s   account=%s' % (
-                action,
-                event and pformat(vars(event), width=sys.maxint) or '',
-                pformat(vars(self.account), width=sys.maxint) 
-            ))
-
-
-
+class GetRegistrants(WebinarExchange):
+    def sub_path(self): return 'webinars/%s/registrants'%self.webinar.key
+    def process_data(self, data, response): 
+        return [Registrant(webinar=self.webinar,**kwargs) for kwargs in data]
 
