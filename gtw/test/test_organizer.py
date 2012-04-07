@@ -5,6 +5,7 @@ from ..organizer import GetPastWebinars, GetFutureWebinars, GetSessionedWebinars
 from sanetime import time
 from ..session import Session
 from giftwrap import mocker
+from utils.list import sort
 
 
 class OrganizerTest(unittest.TestCase):
@@ -23,7 +24,8 @@ class OrganizerTest(unittest.TestCase):
     sessioned_json = u"""
             [   { "sessionKey": 4942, "webinarKey": 8471, "startTime": "2011-06-01T10:01:00Z", "endTime": "2011-06-01T11:01:00Z", "registrantsAttended": 11 },
                 { "sessionKey": 6043, "webinarKey": 2394, "startTime": "2011-07-01T12:02:00Z", "endTime": "2011-07-01T13:02:00Z", "registrantsAttended": 22 },
-                { "sessionKey": 5028, "webinarKey": 2394, "startTime": "2011-07-02T12:02:00Z", "endTime": "2011-07-02T13:02:00Z", "registrantsAttended": 33 } ] """
+                { "sessionKey": 5028, "webinarKey": 2394, "startTime": "2011-07-02T12:02:00Z", "endTime": "2011-07-02T13:02:00Z", "registrantsAttended": 33 },
+                { "sessionKey": 4023, "webinarKey": 2394, "startTime": "2011-08-01T12:03:00Z", "endTime": "2011-08-01T13:03:00Z", "registrantsAttended": 44 } ] """
 
     def setUp(self): self.organizer = OrganizerJukeBox().organizer
     def tearDown(self): pass
@@ -63,6 +65,7 @@ class OrganizerTest(unittest.TestCase):
         wb = Webinar(self.organizer, key=2394, subject=u"Subject2\u2603", description=u"Description2\u2603", timezone=u"America/New_York", sessions=[])
         wb.sessions.append(Session(wb, key=6043, attendant_count=22, started_at=time('7/1/11 12:02'), ended_at=time('7/1/11 13:02'), starts_at=time('7/1/11 12:00'), ends_at=time('7/1/11 13:00')))
         wb.sessions.append(Session(wb, key=5028, attendant_count=33, started_at=time('7/2/11 12:02'), ended_at=time('7/2/11 13:02'), starts_at=time('7/2/11 12:00'), ends_at=time('7/2/11 13:00')))
+        wb.sessions.append(Session(wb, key=4023, attendant_count=44, started_at=time('8/1/11 12:03'), ended_at=time('8/1/11 13:03')))
         wc = Webinar(self.organizer, key=1034, subject=u"Subject1\u2603", description=u"Description1\u2603", timezone=u"America/New_York", sessions=[])
         wc.sessions.append(Session(wc, starts_at=time('6/1/12 10:00'), ends_at=time('6/1/12 11:00')))
         wd = Webinar(self.organizer, key=9582, subject=u"Subject2\u2603", description=u"Description2\u2603", timezone=u"America/New_York", sessions=[])
@@ -72,6 +75,9 @@ class OrganizerTest(unittest.TestCase):
             with mocker(GetFutureWebinars, text=self.future_json):
                 with mocker(GetSessionedWebinars, text=self.sessioned_json):
                     self.assertEquals([wa,wb,wc,wd], self.organizer.webinars)
+                    for w in self.organizer.webinars:
+                        for s in w.sessions:
+                            self.assertEquals(id(w),id(s.webinar))
 
 #    @unittest.skip
     def test_live_listing(self):
@@ -85,8 +91,33 @@ class OrganizerTest(unittest.TestCase):
         print sum(len(w.sessions) for w in organizer.webinars)
 
 
-    def test_xxx(self):
-        webinar = Webinar(self.organizer, key='834658855', timezone='America/New_York')
-        session = Session(webinar, key='300000000000439388', starts_at=time('7/1/12 11:00'), ends_at=time('7/1/12 12:00'), started_at=time('7/1/12 11:01'), ended_at=time('7/1/12 12:01')) 
-        print session.registrants
+    #def test_maggie(self):
+        #organizer = OrganizerJukeBox()['maggie']
+        #for w in organizer.webinars:
+            #if w.key == 179381720:
+                #i = 0
+                #for s in w.sessions:
+                    #print id(s)
+                    #print i+1
+                    #print w.sessions.index(s)+1
+                    #self.assertEquals(id(w), id(s.webinar))
+                    #i = i+1
+                    #print s.universal_key
+                    #print s
+
+            #print w
+            #for s in w.sessions])
+
+        #a = sort([(s.universal_key,s) for w in organizer.webinars for s in w.sessions])
+        #k = None
+        #q = None
+        #for s in a:
+            #if s[0]==k: 
+                #print " ---------- "
+                #print q
+                #print s[1]
+
+            #k = s[0]
+            #q = s[1]
+
 

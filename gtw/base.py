@@ -56,6 +56,8 @@ class Base(object):
                         break;
             if len(that_set) == 0 or len(this_set) == 0:
                 this_list.extend(that_set)
+                for that in that_set:
+                    that.webinar = self
             elif len(that_set) == 1 and len(this_set) == 1:
                 list(that_set)[0].merge(list(this_set)[0])
             else:
@@ -64,6 +66,7 @@ class Base(object):
                 raise ValueError("very unexpected-- session merge is unable to merge completely.")
         else:
             this_list.extend(that_set)
+            
 
         setattr(self,attr,sort(this_list))
         return getattr(self,attr)
