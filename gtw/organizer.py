@@ -4,6 +4,11 @@ from utils.list import sort
 from giftwrap import Auth, Exchange, JsonExchange
 from .webinar import Webinar
 from .session import Session
+from sanetime import time,delta
+
+
+API_TIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
+DEFAULT_HISTORY_DELTA = delta(d=365*5)
 
 
 class Organizer(Auth):
@@ -16,6 +21,7 @@ class Organizer(Auth):
         super(Organizer, self).__init__()
         self.oauth = mget(kwargs,'oauth','oauth_token','access_token')
         self.key = mget(kwargs,'key','organizerKey','organizer_key')
+        self.now = time()
 
     def __repr__(self): 
         return "Organizer(%s)" % kwargs_str(self.__dict__,'oauth','key')
@@ -41,29 +47,38 @@ class Organizer(Auth):
         return sort(webinars.values())
 
     @cached_property
-    def _past_ex(self): return GetPastWebinars(self)
+    def _past_ex(self): return GetPastWebinars(self, self.now-DEFAULT_HISTORY_DELTA, self.now)
 
     @cached_property
     def _future_ex(self): return GetFutureWebinars(self)
 
     @cached_property
-    def _sessioned_ex(self): return GetSessionedWebinars(self)
+    def _sessioned_ex(self): return GetSessionedWebinars(self, self.now-DEFAULT_HISTORY_DELTA, self.now)
 
 
 
 # exchanges
 
-class GetPastWebinars(JsonExchange):
+class TimeWindowExchange(JsonExchange):
+    def __init__(self, auth, start_at, end_at, **kwargs):
+        super(TimeWindowExchange, self).__init__(auth, **kwargs)
+        self.start_at = start_at
+        self.end_at = end_at
+
+class GetPastWebinars(TimeWindowExchange):
     sub_path = 'historicalWebinars'
+    def params(self): return { 'fromTime':self.start_at.strftime(API_TIME_FORMAT), 'toTime':self.end_at.strftime(API_TIME_FORMAT) }
     def process_data(self, data, response): return [Webinar(self.auth, scheduled=True, **kwargs) for kwargs in data]
 
 class GetFutureWebinars(JsonExchange):
     sub_path = 'webinars'
     def process_data(self, data, response): return [Webinar(self.auth, scheduled=True, **kwargs) for kwargs in data]
 
-class GetSessionedWebinars(JsonExchange):
+class GetSessionedWebinars(TimeWindowExchange):
     sub_path = 'sessions'
+    def params(self): return { 'fromTime':self.start_at.strftime(API_TIME_FORMAT), 'toTime':self.end_at.strftime(API_TIME_FORMAT) }
     def process_data(self, data, response): 
+    #    print response.request.url
         webinars_hash = {}
         webinars = []
         for kwargs in data:

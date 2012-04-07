@@ -1,4 +1,4 @@
--e git://github.com/prior/utilspy.git@v0.5.1#egg=utilspy-0.5.1
--e git://github.com/prior/sanetime.git@v3.4.1#egg=sanetime-3.4.1
+-e git://github.com/prior/utilspy.git@v0.5.2#egg=utilspy-0.5.2
+-e git://github.com/prior/sanetime.git@v3.4.2#egg=sanetime-3.4.2
 -e git://github.com/prior/giftwrap.git@v1.2.2#egg=giftwrap-1.2.2
 

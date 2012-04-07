@@ -73,13 +73,20 @@ class OrganizerTest(unittest.TestCase):
                 with mocker(GetSessionedWebinars, text=self.sessioned_json):
                     self.assertEquals([wa,wb,wc,wd], self.organizer.webinars)
 
-    @unittest.skip
+#    @unittest.skip
     def test_live_listing(self):
-        organizer = OrganizerJukeBox().organizer
+        organizer = OrganizerJukeBox()['default']
         for w in organizer.webinars:
-            w.registrants
+            #w.registrants
             for s in w.sessions:
                 s.registrants
+                print s
+        print len(organizer.webinars)
+        print sum(len(w.sessions) for w in organizer.webinars)
 
-            print w
+
+    def test_xxx(self):
+        webinar = Webinar(self.organizer, key='834658855', timezone='America/New_York')
+        session = Session(webinar, key='300000000000439388', starts_at=time('7/1/12 11:00'), ends_at=time('7/1/12 12:00'), started_at=time('7/1/12 11:01'), ended_at=time('7/1/12 12:01')) 
+        print session.registrants
 

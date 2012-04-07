@@ -56,7 +56,11 @@ class Base(object):
                         break;
             if len(that_set) == 0 or len(this_set) == 0:
                 this_list.extend(that_set)
+            elif len(that_set) == 1 and len(this_set) == 1:
+                list(that_set)[0].merge(list(this_set)[0])
             else:
+                print list(len(that_set))
+                print list(len(this_set))
                 raise ValueError("very unexpected-- session merge is unable to merge completely.")
         else:
             this_list.extend(that_set)

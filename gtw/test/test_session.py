@@ -41,3 +41,16 @@ class SessionTest(unittest.TestCase):
                 session = Session(w, key=6043, started_at=time('2012-06-01'))
                 self.assertEquals(registrants, session.registrants)
 
+    def test_universal_key(self):
+        w = Webinar(self.organizer, key=4918, timezone='America/New_York', sessions=[])
+        sa = Session(w, key=2058, started_at=time('2012-06-01'))
+        sb = Session(w, key=2023, started_at=time('2012-06-02'))
+        sc = Session(w, key=2084, started_at=time('2012-06-03'))
+        w.sessions.append(sa)
+        w.sessions.append(sb)
+        w.sessions.append(sc)
+        self.assertEquals('4918-1', sa.universal_key)
+        self.assertEquals('4918-2', sb.universal_key)
+        self.assertEquals('4918-3', sc.universal_key)
+
+

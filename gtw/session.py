@@ -1,5 +1,5 @@
 from sanetime import nsanetime
-from utils.property import cached_property, cached_value, cached_key
+from utils.property import cached_property, cached_value, cached_key, is_cached
 from utils.dict import mget
 from utils.list import sort
 from utils.obj import kwargs_str
@@ -65,6 +65,11 @@ class Session(Base, mixins.Session):
         return self
 
     def __cmp__(self, other): return self._cmp_components(other, 'starts_at','ends_at','started_at','ended_at','key','attendant_count', cached_key('attendees'))
+
+    @property  #ghetto webinar/session key -- useful for future events that don't have a session key yet
+    def universal_key(self):
+        if not self.webinar or not self.webinar.key or not is_cached(self.webinar,'sessions') or self not in self.webinar.sessions: return None
+        return "%s-%s" % (self.webinar.key, self.webinar.sessions.index(self)+1)
 
 
 class SessionExchange(JsonExchange):
