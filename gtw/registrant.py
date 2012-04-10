@@ -46,6 +46,9 @@ class Registrant(Base):
 
     def create(self): return self._create_ex.result
 
+    @classmethod
+    def _create(kls, registrants): return CreateRegistrant.async_results([r._create_ex for r in registrants])
+
     @cached_property
     def _create_ex(self): return CreateRegistrant(self)
 
@@ -55,7 +58,7 @@ class Registrant(Base):
         started_at = self.started_at and "%s +%s" % (sanetztime(self.started_at).set_tz(self.timezone).strftime('%m/%d/%y %I:%M%p').lower(), self.timezone) or '?'
         ended_at = self.ended_at and "%s +%s" % (sanetztime(self.ended_at).set_tz(self.timezone).strftime('%m/%d/%y %I:%M%p').lower(), self.timezone) or '?'
         registered_at = self.registered_at and "%s +%s" % (sanetztime(self.registered_at).set_tz(self.timezone).strftime('%m/%d/%y %I:%M%p').lower(), self.timezone) or '?'
-        return u"%s[%s] %s (%s %s) %s [ %s ] (%s - %s) :%s" % (self.started_at and 'A' or 'R', self.key, self.email, self.first_name, self.last_name, self.duration, self.status or '?', started_at, ended_at, registered_at)
+        return u"%s[%s] %s (%s %s) %s [ %s ] (%s - %s) :%s =%s" % (self.started_at and 'A' or 'R', self.key, self.email, self.first_name, self.last_name, self.duration, self.status or '?', started_at, ended_at, registered_at, self.join_url)
 
     @property
     def timezone(self): return self.session and self.session.timezone or self.webinar and self.webinar.timezone

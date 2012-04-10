@@ -5,7 +5,6 @@ from ..organizer import GetPastWebinars, GetFutureWebinars, GetSessionedWebinars
 from sanetime import time
 from ..session import Session
 from giftwrap import mocker
-from utils.list import sort
 
 
 class OrganizerTest(unittest.TestCase):
@@ -54,6 +53,7 @@ class OrganizerTest(unittest.TestCase):
         wb = Webinar(self.organizer, key=2394, sessions=[])
         wb.sessions.append(Session(wb, key=6043, attendant_count=22, started_at=time('7/1/11 12:02'), ended_at=time('7/1/11 13:02')))
         wb.sessions.append(Session(wb, key=5028, attendant_count=33, started_at=time('7/2/11 12:02'), ended_at=time('7/2/11 13:02')))
+        wb.sessions.append(Session(wb, key=4023, attendant_count=44, started_at=time('8/1/11 12:03'), ended_at=time('8/1/11 13:03')))
         with mocker(GetSessionedWebinars, text=self.sessioned_json):
             self.assertEquals(wa, self.organizer.sessioned_webinars[0])
             self.assertEquals(wb, self.organizer.sessioned_webinars[1])
@@ -79,45 +79,26 @@ class OrganizerTest(unittest.TestCase):
                         for s in w.sessions:
                             self.assertEquals(id(w),id(s.webinar))
 
-#    @unittest.skip
+    @unittest.skip
     def test_live_listing(self):
         organizer = OrganizerJukeBox()['default']
         for w in organizer.webinars:
-            #w.registrants
             for s in w.sessions:
                 s.registrants
-                print s
+            print w
         print len(organizer.webinars)
         print sum(len(w.sessions) for w in organizer.webinars)
 
+    @unittest.skip
+    def test_maggie(self):
+        def f(total, r):
+            total.setdefault(r.email,[]).append(r)
+            return total
+        organizer = OrganizerJukeBox()['maggie']
+        for w in organizer.webinars:
+            breakdown = reduce(f, w.registrants, {})
+            for v in breakdown.values():
+                if len(v) > 1: print v
 
-    #def test_maggie(self):
-        #organizer = OrganizerJukeBox()['maggie']
-        #for w in organizer.webinars:
-            #if w.key == 179381720:
-                #i = 0
-                #for s in w.sessions:
-                    #print id(s)
-                    #print i+1
-                    #print w.sessions.index(s)+1
-                    #self.assertEquals(id(w), id(s.webinar))
-                    #i = i+1
-                    #print s.universal_key
-                    #print s
-
-            #print w
-            #for s in w.sessions])
-
-        #a = sort([(s.universal_key,s) for w in organizer.webinars for s in w.sessions])
-        #k = None
-        #q = None
-        #for s in a:
-            #if s[0]==k: 
-                #print " ---------- "
-                #print q
-                #print s[1]
-
-            #k = s[0]
-            #q = s[1]
-
+            print len(breakdown)
 

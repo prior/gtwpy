@@ -1,6 +1,6 @@
 import unittest
 from .organizer_jukebox import OrganizerJukeBox
-from ..webinar import Webinar, GetRegistrants
+from ..webinar import Webinar, GetRegistrations
 from ..session import Session, GetAttendees
 from ..registrant import Registrant
 from sanetime import delta, time
@@ -37,7 +37,7 @@ class SessionTest(unittest.TestCase):
         registrants.append(Registrant(webinar=w, session=s, key=2305, first_name=u'Suzy', last_name=u'Samwell', email=u'ss@test.com', registered_at='5/2/12 18:02', join_url='http://bit.ly/8592932', status='APPROVED', duration=delta(s=4931)))
         registrants.append(Registrant(webinar=w, session=s, key=4203, first_name=u'Todd', last_name=u'Kells', email=u'tkells@test.com', registered_at='5/3/12 18:03', join_url='http://bit.ly/9293842', status='WAITING'))
         with mocker(GetAttendees, text=self.attendees_json):
-            with mocker(GetRegistrants, text=self.registrants_json):
+            with mocker(GetRegistrations, text=self.registrants_json):
                 session = Session(w, key=6043, started_at=time('2012-06-01'))
                 self.assertEquals(registrants, session.registrants)
 

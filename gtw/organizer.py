@@ -8,7 +8,7 @@ from sanetime import time,delta
 
 
 API_TIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
-DEFAULT_HISTORY_DELTA = delta(d=365*5)
+DEFAULT_HISTORY_DELTA = delta(y=20)
 
 
 class Organizer(Auth):
@@ -47,13 +47,13 @@ class Organizer(Auth):
         return sort(webinars.values())
 
     @cached_property
-    def _past_ex(self): return GetPastWebinars(self, self.now-DEFAULT_HISTORY_DELTA, self.now)
+    def _past_ex(self): return GetPastWebinars(self, self.now-DEFAULT_HISTORY_DELTA, self.now-delta(s=10))
 
     @cached_property
     def _future_ex(self): return GetFutureWebinars(self)
 
     @cached_property
-    def _sessioned_ex(self): return GetSessionedWebinars(self, self.now-DEFAULT_HISTORY_DELTA, self.now)
+    def _sessioned_ex(self): return GetSessionedWebinars(self, self.now-DEFAULT_HISTORY_DELTA, self.now-delta(s=10))
 
 
 

@@ -51,7 +51,7 @@ class Session(Base, mixins.Session):
     @cached_property
     def registrants(self):
         if not self.key: return self.webinar.registrants
-        SessionExchange.async_exchange([self.webinar._registrants_ex, self._attendees_ex])
+        SessionExchange.async_exchange([self.webinar._registrations_ex, self._attendees_ex])
         _registrants = [r.clone() for r in self.webinar.registrants]
         attendee_dict = dict((a.email,a) for a in self.attendees)
         for r in _registrants:

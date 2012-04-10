@@ -1,5 +1,6 @@
 from utils.property import is_cached
 from utils.list import sort
+from utils.obj import mgetattr
 
 class Base(object):
 
@@ -25,6 +26,8 @@ class Base(object):
             setattr(self, attr, getattr(other, attr))
             return
 
+        if not isinstance(keys[0], tuple): keys = [(k,) for k in keys]
+
         this_list = getattr(self, attr)
         that_list = getattr(other, attr)
         this_set = set(this_list)
@@ -32,13 +35,13 @@ class Base(object):
 
         that_dicts = {}
         for k in keys:
-            that_dicts[k] = dict((getattr(item,k),item)  for item in getattr(other, attr) if getattr(item,k,None))
+            that_dicts[k] = dict((mgetattr(item,k),item) for item in getattr(other, attr) if mgetattr(item,k,None) != mgetattr(item,'',None))
 
         for this_item in this_list:
             that_item = None
             for k in keys:
-                key_value = getattr(this_item, k, None)
-                if key_value and that_dicts[k].has_key(key_value):
+                key_value = mgetattr(this_item, k, None)
+                if key_value != mgetattr(this_item,'',None) and that_dicts[k].has_key(key_value):
                     that_item = that_dicts[k][key_value]
                     break
             if that_item:

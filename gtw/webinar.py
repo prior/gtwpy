@@ -17,25 +17,25 @@ class Webinar(Base):
         self.description = kwargs.get('description')
         self.timezone = mget(kwargs, 'timezone', 'timeZone') or 'UTC'
         if kwargs.has_key('sessions'): self.sessions = kwargs['sessions']
-        if kwargs.has_key('registrants'): self.registrants = kwargs['registrants']
+        if kwargs.has_key('registrations'): self.registrations = kwargs['registrations']
         if kwargs.has_key('times') and not is_cached(self,'sessions'):
             extras = getdict(kwargs, 'scheduled','actual')
             self.sessions = [Session(webinar=self, **merge(span,extras)) for span in kwargs.get('times',[])]
 
     def __repr__(self): 
-        return "Webinar(%s)" % kwargs_str(self,attrs=['organizer','key','subject','description'],cached=['sessions','registrants'])
+        return "Webinar(%s)" % kwargs_str(self,attrs=['organizer','key','subject','description'],cached=['sessions','registrations'])
     def __str__(self): return unicode(self).encode('utf-8')
     def __unicode__(self):
         webinar_key = self.key or '?'
         subject = self.subject or '?'
         description = cutoff(self.description or '?', 40)
         sessions = "\n  ".join(['']+[unicode(s) for s in cached_value(self,'sessions',[])])
-        registrants = "\n  ".join(['']+[unicode(s) for s in cached_value(self,'registrants',[])])
-        return u"W[%s]%s{%s}%s%s" % (webinar_key, subject, description, registrants, sessions) 
+        registrations = "\n  ".join(['']+[unicode(s) for s in cached_value(self,'registrations',[])])
+        return u"W[%s]%s{%s}%s%s" % (webinar_key, subject, description, registrations, sessions) 
 
     def merge(self, webinar):
         self.merge_primitives(webinar)
-        self._merge_cached_exchange_collection(webinar, 'registrants', keys=['email'])
+        self._merge_cached_exchange_collection(webinar, 'registrations', keys=[('email','status')])
         self._merge_cached_exchange_collection(webinar, 'sessions', keys=['key','starts_at','started_at'], session_match=True)
         return self
 
@@ -45,7 +45,7 @@ class Webinar(Base):
 
 
     #TODO: deal with scenario where times are equal but timezones are different -- what should we do?
-    def __cmp__(self, other): return self._cmp_components(other, cached_key('sessions'), 'key', 'subject', 'description', 'timezone', cached_key('registrants'))
+    def __cmp__(self, other): return self._cmp_components(other, cached_key('sessions'), 'key', 'subject', 'description', 'timezone', cached_key('registrations'))
 
     def clone(self):
         return Webinar(None).merge(self)
@@ -54,14 +54,18 @@ class Webinar(Base):
     def sessions(self): return self._sessions_ex.result
 
     @cached_property
+    def registrations(self): 
+        return self._registrations_ex.result
+
+    @cached_property
     def registrants(self): 
-        return self._registrants_ex.result
+        return [r for r in self.registrations if r.status != 'DELETED']
 
     @cached_property
     def _sessions_ex(self): return GetSessions(self)
 
     @cached_property
-    def _registrants_ex(self): return GetRegistrants(self)
+    def _registrations_ex(self): return GetRegistrations(self)
 
     
 class WebinarExchange(JsonExchange):
@@ -79,7 +83,8 @@ class GetSessions(WebinarExchange):
             sessions.append(Session(self.webinar, actual=True, **kwargs))
         return sessions
 
-class GetRegistrants(WebinarExchange):
+# can have multiple status values for a single email -- i.e. DELETE then WAITING
+class GetRegistrations(WebinarExchange):
     def sub_path(self): return 'webinars/%s/registrants'%self.webinar.key
     def process_data(self, data, response): 
         return [Registrant(webinar=self.webinar,**kwargs) for kwargs in data]
