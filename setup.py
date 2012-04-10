@@ -1,14 +1,16 @@
 #!/usr/bin/env python
 from distutils.core import setup
 
+VERSION='1.1.1'
+
 setup(
     name='gtwpy',
-    version='1.1.0',
+    version=VERSION,
     description='Python GoToWebinar (GTW) REST API Wrapper',
     author='Michael Prior',
     author_email='prior@cracklabs.com',
     url='https://github.com/prior/pygtw',
-    download_url='https://github.com/prior/gtwpy/tarball/v1.1.0',
+    download_url='https://github.com/prior/gtwpy/tarball/v%s'%VERSION,
     packages=['gtw'],
     install_requires=[ 'nose==1.1.2' ]
 )

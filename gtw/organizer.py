@@ -8,7 +8,7 @@ from sanetime import time,delta
 
 
 API_TIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
-DEFAULT_HISTORY_DELTA = delta(y=20)
+DEFAULT_HISTORY_DELTA = delta(ay=20)
 
 
 class Organizer(Auth):
