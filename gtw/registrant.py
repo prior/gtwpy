@@ -1,7 +1,8 @@
 from utils.dict import mget
 from utils.string import nstrip
 from utils.property import cached_property
-from sanetime import nsanetime, sanedelta, sanetztime
+from utils.list import sort
+from sanetime import nsanetime, sanedelta, sanetztime, time
 from .base import Base
 from giftwrap import JsonExchange
 
@@ -19,7 +20,12 @@ class Registrant(Base):
         self.registered_at = nsanetime(mget(kwargs, 'registered_at', 'registrationDate'))
         self.join_url = mget(kwargs, 'join_url', 'joinUrl')
         self.status = kwargs.get('status')
-        self.duration = kwargs.get('duration') or kwargs.get('attendanceTimeInSeconds') and sanedelta(s=kwargs['attendanceTimeInSeconds'])
+        self.viewings = kwargs.get('viewings',[])
+        if not self.viewings and kwargs.get('attendance'):
+            self.viewings = sort([(time(d['joinTime']),time(d['leaveTime'])) for d in kwargs['attendance']])
+        if not self.viewings and (kwargs.get('duration') or kwargs.get('attendanceTimeInSeconds')) and self.session and self.session.key and self.session.started_at:
+            duration = kwargs.get('duration') or kwargs.get('attendanceTimeInSeconds') and sanedelta(s=kwargs['attendanceTimeInSeconds'])
+            self.viewings = [(self.session.started_at, self.session.started_at+duration)]
 
     @property
     def name(self): return ('%s %s' % (self.first_name or '', self.last_name or '')).strip()
@@ -30,17 +36,28 @@ class Registrant(Base):
         self.last_name = self.last_name or parts[-1].strip() or None
 
     @property
-    def started_at(self): return self.session and self.session.key and self.duration and self.session.started_at
+    def started_at(self): return self.viewings and self.viewings[0][0] or None
 
     @property
-    def ended_at(self): 
-        return self.session and self.session.key and self.duration and self.session.started_at+self.duration
+    def ended_at(self): return self.viewings and self.viewings[-1][-1] or None
+
+    @property
+    def duration(self): return self.viewings and (self.viewings[-1][-1] - self.viewings[0][0]) or None
 
     def merge(self, other):
-        self._merge_primitives(other, 'webinar', 'session', 'key', 'email', 'first_name', 'last_name', 'registered_at', 'join_url', 'status', 'duration')
+        self._merge_primitives(other, 'webinar', 'session', 'key', 'email', 'first_name', 'last_name', 'registered_at', 'join_url', 'status')
+        viewings = []
+        for v in sort(self.viewings + other.viewings):
+            if viewings:
+                last = viewings[-1]
+                if v[0]<=last[-1]:
+                    viewings[-1] = (min(v[0],last[0]),max(v[-1],last[-1]))
+                    continue
+            viewings.append(v)
+        self.viewings = viewings
         return self
 
-    def __cmp__(self, other): return self._cmp_components(other, 'email', 'last_name', 'first_name', 'started_at', 'ended_at', 'key', 'registered_at', 'join_url', 'status', 'duration')
+    def __cmp__(self, other): return self._cmp_components(other, 'email', 'last_name', 'first_name', 'started_at', 'ended_at', 'key', 'registered_at', 'join_url', 'status', 'viewings')
 
     def clone(self): return Registrant().merge(self)
 
