@@ -80,15 +80,22 @@ class OrganizerTest(unittest.TestCase):
                             self.assertEquals(id(w),id(s.webinar))
 
 
-    @unittest.skip
     def test_live_listing(self):
-        organizer = OrganizerJukeBox()['default']
+        organizer = OrganizerJukeBox()['maggie-prod']
         for w in organizer.webinars:
-            for s in w.sessions:
-                s.registrants
-            print w
-        print len(organizer.webinars)
-        print sum(len(w.sessions) for w in organizer.webinars)
+            if w.key == 226434712:
+                lst = {}
+                for r in w.registrants:
+                    lst.setdefault(r.email,[]).append(r)
+                for v in lst.values():
+                    if len(v)>1:
+                        print v
+
+                #for s in w.sessions:
+                    #s.registrants
+                #print w
+        #print len(organizer.webinars)
+        #print sum(len(w.sessions) for w in organizer.webinars)
 
     @unittest.skip
     def test_maggie(self):

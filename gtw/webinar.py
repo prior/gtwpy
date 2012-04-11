@@ -59,7 +59,18 @@ class Webinar(Base):
 
     @cached_property
     def registrants(self): 
-        return [r for r in self.registrations if r.status != 'DELETED']
+        uniques = {}
+        for r in self.registrations:
+            if r.status in ('DELETED','DENIED') or not r.email: continue
+            uniques.setdefault(r.email,{})[r.status if r.status in ('APPROVED','WAITING','UNREGISTERED') else 'OTHER'] = r  # future proofing a bit
+        final = [] # to keep original ordering
+        for r in self.registrations:
+            if uniques.get(r.email,None):
+                rh = uniques.pop(r.email)
+                r = rh.get('APPROVED') or rh.get('WAITING') or rh.get('UNREGISTERED') or rh.get('OTHER') or None
+                if r: final.append(r)
+        return final
+
 
     @cached_property
     def _sessions_ex(self): return GetSessions(self)
