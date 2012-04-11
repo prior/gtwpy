@@ -83,13 +83,14 @@ class OrganizerTest(unittest.TestCase):
     def test_live_listing(self):
         organizer = OrganizerJukeBox()['maggie-prod']
         for w in organizer.webinars:
-            if w.key == 226434712:
-                lst = {}
-                for r in w.registrants:
-                    lst.setdefault(r.email,[]).append(r)
-                for v in lst.values():
-                    if len(v)>1:
-                        print v
+            if w.key == 519095185:
+                for s in w.sessions:
+                    lst = {}
+                    for r in s.registrants:
+                        lst.setdefault(r.email.lower(),[]).append(r)
+                    for v in lst.values():
+                        if len(v)>1:
+                            print v
 
                 #for s in w.sessions:
                     #s.registrants

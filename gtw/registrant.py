@@ -1,5 +1,5 @@
 from utils.dict import mget
-from utils.string import nstrip
+from utils.string import nstrip,nlower
 from utils.property import cached_property
 from utils.list import sort
 from sanetime import nsanetime, sanedelta, sanetztime, time
@@ -13,7 +13,7 @@ class Registrant(Base):
         self.webinar = kwargs.get('webinar')
         self.session = kwargs.get('session')
         self.key = mget(kwargs, 'key', 'registrant_key', 'registrantKey')
-        self.email = mget(kwargs, 'email', 'attendeeEmail')
+        self.email = nlower(mget(kwargs, 'email', 'attendeeEmail'))
         self.first_name = mget(kwargs, 'first_name', 'firstName', 'first')
         self.last_name = mget(kwargs, 'last_name', 'lastName', 'last')
         if kwargs.get('name'): self.name = nstrip(kwargs.get('name'))
