@@ -31,7 +31,7 @@ class Webinar(Base):
         description = cutoff(self.description or '?', 40)
         sessions = "\n  ".join(['']+[unicode(s) for s in cached_value(self,'sessions',[])])
         registrations = "\n  ".join(['']+[unicode(s) for s in cached_value(self,'registrations',[])])
-        return u"W[%s]%s{%s}%s%s" % (webinar_key, subject, description, registrations, sessions) 
+        return u"W[%s]%s{%s} +%s%s%s" % (webinar_key, subject, description, self.timezone, registrations, sessions) 
 
     def merge(self, webinar):
         self.merge_primitives(webinar)
