@@ -9,6 +9,7 @@ from sanetime import time,delta
 
 API_TIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 DEFAULT_HISTORY_DELTA = delta(ay=20)
+GTW_NOW_DELTA = delta(s=10) # cuz gtw 500s when your time range enters the future, and their servers seem to be off by a few seconds
 
 
 class Organizer(Auth):
@@ -22,6 +23,7 @@ class Organizer(Auth):
         self.oauth = mget(kwargs,'oauth','oauth_token','access_token')
         self.key = mget(kwargs,'key','organizerKey','organizer_key')
         self.now = time()
+        self.starts_at = kwargs.get('starts_at',None) or (self.now - DEFAULT_HISTORY_DELTA)
 
     def __repr__(self): 
         return "Organizer(%s)" % kwargs_str(self.__dict__,'oauth','key')
@@ -47,13 +49,13 @@ class Organizer(Auth):
         return sort(webinars.values())
 
     @cached_property
-    def _past_ex(self): return GetPastWebinars(self, self.now-DEFAULT_HISTORY_DELTA, self.now-delta(s=10))
+    def _past_ex(self): return GetPastWebinars(self, self.starts_at, self.now-GTW_NOW_DELTA)
 
     @cached_property
     def _future_ex(self): return GetFutureWebinars(self)
 
     @cached_property
-    def _sessioned_ex(self): return GetSessionedWebinars(self, self.now-DEFAULT_HISTORY_DELTA, self.now-delta(s=10))
+    def _sessioned_ex(self): return GetSessionedWebinars(self, self.starts_at, self.now-GTW_NOW_DELTA)
 
 
 

@@ -57,19 +57,12 @@ class Base(object):
                         that_set.remove(that_item)
                         this_set.remove(this_item)
                         break;
-            if len(that_set) == 0 or len(this_set) == 0:
-                this_list.extend(that_set)
-                for that in that_set:
-                    that.webinar = self
-            elif len(that_set) == 1 and len(this_set) == 1:
+            if len(that_set) == 1 and len(this_set) == 1:
                 list(that_set)[0].merge(list(this_set)[0])
-            else:
-                print list(len(that_set))
-                print list(len(this_set))
-                raise ValueError("very unexpected-- session merge is unable to merge completely.")
-        else:
-            this_list.extend(that_set)
-            
+            #else give up and just treat them all as different sessions
+        this_list.extend(that_set)
+        if session_match:
+            for that in that_set: that.webinar = self
 
         setattr(self,attr,sort(this_list))
         return getattr(self,attr)

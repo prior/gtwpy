@@ -93,14 +93,5 @@ class OrganizerTest(unittest.TestCase):
 
     @unittest.skip
     def test_maggie(self):
-        def f(total, r):
-            total.setdefault(r.email,[]).append(r)
-            return total
-        organizer = OrganizerJukeBox()['maggie']
-        for w in organizer.webinars:
-            breakdown = reduce(f, w.registrants, {})
-            for v in breakdown.values():
-                if len(v) > 1: print v
-
-            print len(breakdown)
-
+        org = OrganizerJukeBox()['maggie-qa']
+        print len(org.webinars)
