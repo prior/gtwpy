@@ -5,6 +5,8 @@ from ..organizer import GetPastWebinars, GetFutureWebinars, GetSessionedWebinars
 from sanetime import time
 from ..session import Session
 from giftwrap import mocker
+from ..organizer import Organizer
+from ..registrant import Registrant
 
 
 class OrganizerTest(unittest.TestCase):
@@ -80,7 +82,7 @@ class OrganizerTest(unittest.TestCase):
                             self.assertEquals(id(w),id(s.webinar))
 
 
-    @unittest.skip
+#    @unittest.skip
     def test_live_listing(self):
         organizer = OrganizerJukeBox()['default']
         for w in organizer.webinars:
@@ -90,8 +92,39 @@ class OrganizerTest(unittest.TestCase):
         print len(organizer.webinars)
         print sum(len(w.sessions) for w in organizer.webinars)
 
+    @unittest.skip
+    def test_registration(self):
+        organizer = OrganizerJukeBox()['default']
+        for w in organizer.webinars:
+            if w.key == 170884119:
+                #Registrant.random(w).create()
+                Registrant._create(Registrant.random(w,count=10))
+
 
     @unittest.skip
     def test_maggie(self):
-        org = OrganizerJukeBox()['maggie-qa']
-        print len(org.webinars)
+        #org = OrganizerJukeBox()['maggie-qa']
+        #print len(org.webinars)
+        print len(Organizer(key='2710905', oauth='7798e0bf46acca038cfbd2ac3849f77').webinars)
+
+    #@unittest.skip
+    #def test_wtf(self):
+        #org = OrganizerJukeBox()['maggie-qa']
+        #for w in org.webinars:
+
+            #if w.key == 760633440:
+                #print len(w.registrants)
+                #print len(w.sessions)
+                #print w.sessions[0]
+                #print len(w.sessions[0].attendees)
+                #print w.sessions[1]
+                #print len(w.sessions[1].attendees)
+                ##print w.sessions[2]
+                ##print len(w.sessions[2].attendees)
+                ##print w.sessions[3]
+                ##print len(w.sessions[3].attendees)
+                ##print w.sessions[4]
+                ##print len(w.sessions[4].attendees)
+                ##print w.sessions[5]
+                ##print len(w.sessions[5].attendees)
+

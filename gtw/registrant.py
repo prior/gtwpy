@@ -5,6 +5,7 @@ from utils.list import sort
 from sanetime import nsanetime, sanedelta, sanetztime, time
 from .base import Base
 from giftwrap import JsonExchange
+from uuid import uuid4
 
 
 class Registrant(Base):
@@ -64,7 +65,7 @@ class Registrant(Base):
     def create(self): return self._create_ex.result
 
     @classmethod
-    def _create(kls, registrants): return CreateRegistrant.async_results([r._create_ex for r in registrants])
+    def _create(kls, registrants): return CreateRegistrant.bulk_results([r._create_ex for r in registrants], async=False)  # otherwise we api rate limits
 
     @cached_property
     def _create_ex(self): return CreateRegistrant(self)
@@ -79,6 +80,18 @@ class Registrant(Base):
 
     @property
     def timezone(self): return self.session and self.session.timezone or self.webinar and self.webinar.timezone
+
+    @classmethod
+    def random(kls, webinar, count=None):
+        registrants = []
+        for i in xrange(count or 1):
+            guid = ''.join(str(uuid4()).split('-'))
+            registrants.append( Registrant(
+                    webinar=webinar, 
+                    first_name = u'John %s <>&\xfc\u2603 ' % guid[:8],
+                    last_name = u'Smith %s <>&\xfc\u2603 ' % guid[8:16],
+                    email = u'%s.%s@%s.com' % (guid[:8].upper(),guid[:8:16],guid[16:])))
+        return count is None and registrants[0] or registrants
         
 
 class RegistrantExchange(JsonExchange):
@@ -88,7 +101,7 @@ class RegistrantExchange(JsonExchange):
 
 class CreateRegistrant(RegistrantExchange):
     method = 'post'
-    def sub_path(self): return 'webinars/%s/registrants'%self.webinar.key
+    def sub_path(self): return 'webinars/%s/registrants'%self.registrant.webinar.key
     def python_data(self):
         return { "firstName": self.registrant.first_name, "lastName": self.registrant.last_name, "email": self.registrant.email }
     def process_data(self, data, response): 
