@@ -5,7 +5,7 @@ from ..organizer import GetPastWebinars, GetFutureWebinars, GetSessionedWebinars
 from sanetime import time
 from ..session import Session
 from giftwrap import mocker
-from ..organizer import Organizer
+#from ..organizer import Organizer
 from ..registrant import Registrant
 
 
@@ -82,7 +82,7 @@ class OrganizerTest(unittest.TestCase):
                             self.assertEquals(id(w),id(s.webinar))
 
 
-#    @unittest.skip
+    @unittest.skip
     def test_live_listing(self):
         organizer = OrganizerJukeBox()['default']
         for w in organizer.webinars:
@@ -103,9 +103,14 @@ class OrganizerTest(unittest.TestCase):
 
     @unittest.skip
     def test_maggie(self):
-        #org = OrganizerJukeBox()['maggie-qa']
+        org = OrganizerJukeBox()['maggie-qa']
+        for w in org.webinars:
+            for s in w.sessions:
+                if s.universal_key == '522625841-6':
+                    print s
+
         #print len(org.webinars)
-        print len(Organizer(key='2710905', oauth='7798e0bf46acca038cfbd2ac3849f77').webinars)
+#        print len(Organizer(key='2710905', oauth='7798e0bf46acca038cfbd2ac3849f77').webinars)
 
     #@unittest.skip
     #def test_wtf(self):

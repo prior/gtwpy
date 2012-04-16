@@ -106,5 +106,7 @@ class CreateRegistrant(RegistrantExchange):
         return { "firstName": self.registrant.first_name, "lastName": self.registrant.last_name, "email": self.registrant.email }
     def process_data(self, data, response): 
         return self.registrant.merge(Registrant(**data))
+    def process_error(self, error, response):
+        return response is not None and response.status_code==409  # just telling us that the registrant already exists-- so it was successful
 
 
