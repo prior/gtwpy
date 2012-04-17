@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from distutils.core import setup
 
-VERSION='1.3.2'
+VERSION='1.3.3'
 
 setup(
     name='gtwpy',

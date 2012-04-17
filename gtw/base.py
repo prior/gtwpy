@@ -58,7 +58,8 @@ class Base(object):
                         this_set.remove(this_item)
                         break;
             if len(that_set) == 1 and len(this_set) == 1:
-                list(that_set)[0].merge(list(this_set)[0])
+                list(this_set)[0].merge(list(that_set)[0])
+                that_set.clear()
             #else give up and just treat them all as different sessions
         this_list.extend(that_set)
         if session_match:

@@ -72,6 +72,7 @@ class GetPastWebinars(TimeWindowExchange):
     def params(self): return { 'fromTime':self.start_at.strftime(API_TIME_FORMAT), 'toTime':self.end_at.strftime(API_TIME_FORMAT) }
     def process_data(self, data, response): return [Webinar(self.auth, scheduled=True, **kwargs) for kwargs in data]
 
+
 class GetFutureWebinars(JsonExchange):
     sub_path = 'webinars'
     def process_data(self, data, response): return [Webinar(self.auth, scheduled=True, **kwargs) for kwargs in data]
@@ -80,7 +81,6 @@ class GetSessionedWebinars(TimeWindowExchange):
     sub_path = 'sessions'
     def params(self): return { 'fromTime':self.start_at.strftime(API_TIME_FORMAT), 'toTime':self.end_at.strftime(API_TIME_FORMAT) }
     def process_data(self, data, response): 
-    #    print response.request.url
         webinars_hash = {}
         webinars = []
         for kwargs in data:
