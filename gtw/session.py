@@ -31,10 +31,10 @@ class Session(Base, mixins.Session):
         webinar_key = self.webinar and self.webinar.key or '?'
         subject = self.webinar and self.webinar.subject or '?'
         session_key = self.key or '?'
-        starts_at = self.starts_at and "%s +%s" % (self.tz_starts_at.strftime('%m/%d/%y %I:%M%p').lower(), self.timezone) or '?'
-        ends_at = self.ends_at and "%s +%s" % (self.tz_ends_at.strftime('%m/%d/%y %I:%M%p').lower(), self.timezone) or '?'
-        started_at = self.started_at and "%s +%s" % (self.tz_started_at.strftime('%m/%d/%y %I:%M%p').lower(), self.timezone) or '?'
-        ended_at = self.ended_at and "%s +%s" % (self.tz_ended_at.strftime('%m/%d/%y %I:%M%p').lower(), self.timezone) or '?'
+        starts_at = self._starts_at and "%s +%s" % (self.tz_starts_at.strftime('%m/%d/%y %I:%M%p').lower(), self.timezone) or '?'
+        ends_at = self._ends_at and "%s +%s" % (self.tz_ends_at.strftime('%m/%d/%y %I:%M%p').lower(), self.timezone) or '?'
+        started_at = self._started_at and "%s +%s" % (self.tz_started_at.strftime('%m/%d/%y %I:%M%p').lower(), self.timezone) or '?'
+        ended_at = self._ended_at and "%s +%s" % (self.tz_ended_at.strftime('%m/%d/%y %I:%M%p').lower(), self.timezone) or '?'
         count = self.attendant_count is None and '?' or self.attendant_count
         registrants = "\n  ".join(['']+[unicode(s) for s in cached_value(self,'registrants',[])])
         return u"S[%s] W[%s:%s] s:(%s - %s) h:(%s - %s) +%s  ^%s%s" % (session_key, webinar_key, subject, starts_at, ends_at, started_at, ended_at, self.timezone, count, registrants)
