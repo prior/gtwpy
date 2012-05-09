@@ -98,7 +98,7 @@ class OrganizerTest(unittest.TestCase):
                             self.assertEquals(id(w),id(s.webinar))
 
 
-    @unittest.skip
+#    @unittest.skip
     def test_live_listing(self):
         organizer = OrganizerJukeBox()['gmig']
         for w in organizer.webinars:

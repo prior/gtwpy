@@ -1,4 +1,4 @@
 -e git://github.com/prior/utilspy.git@v0.6.0#egg=utilspy-0.6.0
 sanetime>=4.0,<5.0
-giftwrap>=1.5.4,<2.0
+giftwrap>=1.5.5,<2.0
 

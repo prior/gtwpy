@@ -73,9 +73,9 @@ class Registrant(Base):
     def __repr__(self): return str(self)
     def __str__(self): return unicode(self).encode('utf-8')
     def __unicode__(self):
-        started_at = self.started_at and "%s +%s" % (time(self.started_at,self.timezone).strftime('%m/%d/%y %I:%M%p').lower(), self.timezone) or '?'
-        ended_at = self.ended_at and "%s +%s" % (time(self.ended_at,self.timezone).strftime('%m/%d/%y %I:%M%p').lower(), self.timezone) or '?'
-        registered_at = self.registered_at and "%s +%s" % (time(self.registered_at,self.timezone).strftime('%m/%d/%y %I:%M%p').lower(), self.timezone) or '?'
+        started_at = self.started_at and "%s +%s" % (time(self.started_at.us,self.timezone).strftime('%m/%d/%y %I:%M%p').lower(), self.timezone) or '?'
+        ended_at = self.ended_at and "%s +%s" % (time(self.ended_at.us,self.timezone).strftime('%m/%d/%y %I:%M%p').lower(), self.timezone) or '?'
+        registered_at = self.registered_at and "%s +%s" % (time(self.registered_at.us,self.timezone).strftime('%m/%d/%y %I:%M%p').lower(), self.timezone) or '?'
         return u"%s[%s] %s (%s %s) %s [ %s ] (%s - %s) :%s =%s" % (self.started_at and 'A' or 'R', self.key, self.email, self.first_name, self.last_name, self.duration, self.status or '?', started_at, ended_at, registered_at, self.join_url)
 
     @property
