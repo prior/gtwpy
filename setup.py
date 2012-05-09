@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from distutils.core import setup
 
-VERSION='1.3.3'
+VERSION = '1.3.4'
 
 setup(
     name='gtwpy',
@@ -11,6 +11,6 @@ setup(
     author_email='prior@cracklabs.com',
     url='https://github.com/prior/pygtw',
     download_url='https://github.com/prior/gtwpy/tarball/v%s'%VERSION,
-    packages=['gtw'],
+    packages=['gtw','gtw.test'],
     install_requires=[ 'nose==1.1.2' ]
 )

@@ -3,7 +3,7 @@ from .organizer_jukebox import OrganizerJukeBox
 from ..webinar import Webinar, GetRegistrations
 from ..session import Session, GetAttendees
 from ..registrant import Registrant
-from sanetime import delta, time
+from sanetime import time
 from giftwrap import mocker
 
 

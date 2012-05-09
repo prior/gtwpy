@@ -1,4 +1,4 @@
-from sanetime import nsanetime
+from sanetime import ntime
 from utils.property import cached_property, cached_value, cached_key, is_cached
 from utils.dict import mget
 from utils.list import sort
@@ -19,10 +19,10 @@ class Session(Base, mixins.Session):
 
         actual = kwargs.get('actual')
         scheduled = kwargs.get('scheduled')
-        self._starts_at = nsanetime(mget(kwargs,'starts_at','_starts_at') or scheduled and kwargs.get('startTime'))
-        self._ends_at = nsanetime(mget(kwargs,'ends_at','_ends_at') or scheduled and kwargs.get('endTime'))
-        self._started_at = nsanetime(mget(kwargs,'started_at','_started_at') or actual and kwargs.get('startTime'))
-        self._ended_at = nsanetime(mget(kwargs,'ended_at','_ended_at') or actual and kwargs.get('endTime'))
+        self._starts_at = ntime(mget(kwargs,'starts_at','_starts_at') or scheduled and kwargs.get('startTime'))
+        self._ends_at = ntime(mget(kwargs,'ends_at','_ends_at') or scheduled and kwargs.get('endTime'))
+        self._started_at = ntime(mget(kwargs,'started_at','_started_at') or actual and kwargs.get('startTime'))
+        self._ended_at = ntime(mget(kwargs,'ended_at','_ended_at') or actual and kwargs.get('endTime'))
 
     def __repr__(self): 
         return "Session(%s)" % kwargs_str(self,attrs=['key','_starts_at','_ends_at','_started_at','_ended_at','attendant_count'], cached=['attendees'])

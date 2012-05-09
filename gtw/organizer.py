@@ -8,7 +8,7 @@ from sanetime import time,delta
 
 
 API_TIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
-DEFAULT_HISTORY_DELTA = delta(ay=20)
+DEFAULT_HISTORY_DELTA = delta(my=20)
 GTW_NOW_DELTA = delta(s=10) # cuz gtw 500s when your time range enters the future, and their servers seem to be off by a few seconds
 
 

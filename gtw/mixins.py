@@ -1,4 +1,4 @@
-from sanetime import sanetztime
+from sanetime import time
 
 class Session(object):
     @property
@@ -39,13 +39,13 @@ class Session(object):
     def timezone(self): return getattr(self.webinar,'timezone',None) or 'UTC'
 
     @property
-    def tz_starts_at(self): return sanetztime(self.starts_at, tz=self.timezone)
+    def tz_starts_at(self): return time(self.starts_at, tz=self.timezone)
     @property
-    def tz_ends_at(self): return sanetztime(self.ends_at, tz=self.timezone)
+    def tz_ends_at(self): return time(self.ends_at, tz=self.timezone)
     @property
-    def tz_started_at(self): return sanetztime(self.started_at, tz=self.timezone)
+    def tz_started_at(self): return time(self.started_at, tz=self.timezone)
     @property
-    def tz_ended_at(self): return sanetztime(self.ended_at, tz=self.timezone)
+    def tz_ended_at(self): return time(self.ended_at, tz=self.timezone)
 
     def overlaps(self, other): return self.starts_at < other.ends_at and self.ends_at > other.starts_at or self.started_at < other.ended_at and self.ended_at > other.started_at
 

@@ -2,7 +2,7 @@ from utils.dict import mget
 from utils.string import nstrip,nlower
 from utils.property import cached_property
 from utils.list import sort
-from sanetime import nsanetime, sanedelta, sanetztime, time
+from sanetime import ntime, delta, time
 from .base import Base
 from giftwrap import JsonExchange
 from uuid import uuid4
@@ -18,14 +18,14 @@ class Registrant(Base):
         self.first_name = mget(kwargs, 'first_name', 'firstName', 'first')
         self.last_name = mget(kwargs, 'last_name', 'lastName', 'last')
         if kwargs.get('name'): self.name = nstrip(kwargs.get('name'))
-        self.registered_at = nsanetime(mget(kwargs, 'registered_at', 'registrationDate'))
+        self.registered_at = ntime(mget(kwargs, 'registered_at', 'registrationDate'))
         self.join_url = mget(kwargs, 'join_url', 'joinUrl')
         self.status = kwargs.get('status')
         self.viewings = kwargs.get('viewings',[])
         if not self.viewings and kwargs.get('attendance'):
             self.viewings = sort([(time(d['joinTime']),time(d['leaveTime'])) for d in kwargs['attendance']])
         if not self.viewings and (kwargs.get('duration') or kwargs.get('attendanceTimeInSeconds')) and self.session and self.session.key and self.session.started_at:
-            duration = kwargs.get('duration') or kwargs.get('attendanceTimeInSeconds') and sanedelta(s=kwargs['attendanceTimeInSeconds'])
+            duration = kwargs.get('duration') or kwargs.get('attendanceTimeInSeconds') and delta(s=kwargs['attendanceTimeInSeconds'])
             self.viewings = [(self.session.started_at, self.session.started_at+duration)]
 
     @property
@@ -73,9 +73,9 @@ class Registrant(Base):
     def __repr__(self): return str(self)
     def __str__(self): return unicode(self).encode('utf-8')
     def __unicode__(self):
-        started_at = self.started_at and "%s +%s" % (sanetztime(self.started_at).set_tz(self.timezone).strftime('%m/%d/%y %I:%M%p').lower(), self.timezone) or '?'
-        ended_at = self.ended_at and "%s +%s" % (sanetztime(self.ended_at).set_tz(self.timezone).strftime('%m/%d/%y %I:%M%p').lower(), self.timezone) or '?'
-        registered_at = self.registered_at and "%s +%s" % (sanetztime(self.registered_at).set_tz(self.timezone).strftime('%m/%d/%y %I:%M%p').lower(), self.timezone) or '?'
+        started_at = self.started_at and "%s +%s" % (time(self.started_at,self.timezone).strftime('%m/%d/%y %I:%M%p').lower(), self.timezone) or '?'
+        ended_at = self.ended_at and "%s +%s" % (time(self.ended_at,self.timezone).strftime('%m/%d/%y %I:%M%p').lower(), self.timezone) or '?'
+        registered_at = self.registered_at and "%s +%s" % (time(self.registered_at,self.timezone).strftime('%m/%d/%y %I:%M%p').lower(), self.timezone) or '?'
         return u"%s[%s] %s (%s %s) %s [ %s ] (%s - %s) :%s =%s" % (self.started_at and 'A' or 'R', self.key, self.email, self.first_name, self.last_name, self.duration, self.status or '?', started_at, ended_at, registered_at, self.join_url)
 
     @property
