@@ -1,16 +1,28 @@
 #!/usr/bin/env python
-from distutils.core import setup
+from setuptools import setup, find_packages
 
-VERSION = '1.3.6'
+VERSION = '1.3.7'
 
 setup(
     name='gtwpy',
     version=VERSION,
-    description='Python GoToWebinar (GTW) REST API Wrapper',
-    author='Michael Prior',
-    author_email='prior@cracklabs.com',
-    url='https://github.com/prior/pygtw',
-    download_url='https://github.com/prior/gtwpy/tarball/v%s'%VERSION,
-    packages=['gtw','gtw.test'],
-    install_requires=[ 'nose==1.1.2' ]
+    author='prior',
+    author_email='mprior@hubspot.com',
+    packages=find_packages(),
+    url='https://github.com/HubSpot/gtwpy',
+    download_url='https://github.com/HubSpot/gtwpy/tarball/v%s'%VERSION,
+    license='LICENSE.txt',
+    description='A kickass wrapper around the Citrix GoToWebinar REST API',
+    long_description=open('README.rst').read(),
+    install_requires=[
+        'sanetime>=4,<5',
+        'utilspy>=1,<2',
+        'giftwrap>=1,<2'
+        'gevent<2',
+    ],
+    dependency_links=[
+        'https://bitbucket.org/denis/gevent/get/82f623ff862a.tar.gz#egg=gevent'   # gevent 1.0b2
+    ],
+    platforms=['any']
 )
+
