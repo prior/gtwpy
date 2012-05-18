@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from setuptools import setup, find_packages
 
-VERSION = '1.3.7'
+VERSION = '1.3.'
 
 setup(
     name='gtwpy',
@@ -17,7 +17,7 @@ setup(
     install_requires=[
         'sanetime>=4,<5',
         'utilspy>=1,<2',
-        'giftwrap>=1,<2'
+        'giftwrap>=1,<2',
         'gevent<2',
     ],
     dependency_links=[
