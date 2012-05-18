@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from setuptools import setup, find_packages
 
-VERSION = '1.3.8'
+VERSION = '1.3.9'
 
 setup(
     name='gtwpy',
@@ -16,7 +16,7 @@ setup(
     long_description=open('README.rst').read(),
     install_requires=[
         'sanetime>=4,<5',
-        'utilspy>=1,<2',
+        'utilspy>=0,<1',
         'giftwrap>=1,<2',
         'gevent<2',
     ],
