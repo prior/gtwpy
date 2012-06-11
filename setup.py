@@ -19,6 +19,7 @@ setup(
         'utilspy>=0,<1',
         'giftwrap>=1,<2',
         'gevent<2',
+        'requests>=0.10.0,<0.11'
     ],
     dependency_links=[
         'https://bitbucket.org/denis/gevent/get/82f623ff862a.tar.gz#egg=gevent'   # gevent 1.0b2

@@ -35,16 +35,16 @@ class Base(object):
 
         that_dicts = {}
         for k in keys:
-            that_dicts[k] = dict((mgetattr(item,k),item) for item in getattr(other, attr) if mgetattr(item,k,None) != mgetattr(item,'',None))
+            that_dicts[k] = dict((mgetattr(item,k),item) for item in getattr(other, attr) if mgetattr(item,k,None))
 
         for this_item in this_list:
             that_item = None
             for k in keys:
                 key_value = mgetattr(this_item, k, None)
-                if key_value != mgetattr(this_item,'',None) and that_dicts[k].has_key(key_value):
+                if key_value and that_dicts[k].has_key(key_value):
                     that_item = that_dicts[k][key_value]
                     break
-            if that_item:
+            if that_item and that_item in that_set:
                 this_item.merge(that_item)
                 that_set.remove(that_item)
                 this_set.remove(this_item)
